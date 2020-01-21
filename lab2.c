@@ -30,7 +30,7 @@ void PinSetup () {
 /* and output to LEDs */
 /*------------------------------------------------*/
 void count(unsigned char sw2) {
-	if (sw2 == 1) { //count down
+	if (sw2 != 0) { //count down
 		if (counter == 0) {
 			counter = 9;
 		}
@@ -74,9 +74,9 @@ int main(void) {
 
 	/* Endless loop */
 	while (1) { 
-		sw1 = GPIOA->IDR & 0x00000002;
-		sw2 = GPIOA->IDR & 0x00000004;
-		if (sw1 == 1) {
+		sw1 = GPIOA->IDR & 0x00000002; //PA1
+		sw2 = GPIOA->IDR & 0x00000004; //PA2
+		if (sw1 != 0) {
 			count(sw2);
 		}
 		delay();
