@@ -11,8 +11,8 @@ unsigned char counter; /* value of counter */
 
 /*---------------------------------------------------*/
 /* Initialize GPIO pins used in the program */
-/* PA1 = swith 1 (sw1) */
-/* PA2 = swith 2 (sw2) */
+/* PA1 = switch 1 (sw1) */
+/* PA2 = switch 2 (sw2) */
 /* PC[3:0] = counter output */
 /*---------------------------------------------------*/
 void PinSetup () {
