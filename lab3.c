@@ -67,8 +67,8 @@ void count(unsigned char sw2) {
 	GPIOC->BSRR |= (~counter1 & 0x0F) << 16; //reset bits
 	GPIOC->BSRR |= (counter1 & 0x0F); //set bits
 	
-	GPIOC->BSRR |= (~counter2 & 0xF0) << 16; //reset bits
-	GPIOC->BSRR |= (counter2 & 0xF0); //set bits
+	GPIOC->BSRR |= 0xF0 << 16; //reset bits
+	GPIOC->BSRR |= counter2 << 4; //set bits
 	
 }
 
