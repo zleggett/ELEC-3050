@@ -21,7 +21,7 @@ unsigned char LED9;
 /* PC[3:0] = counter1 output */
 /* PC[7:0] = counter2 output */
 /*---------------------------------------------------*/
-void PinSetup () {
+void PinSetup() {
 	/* Configure PA1 and PA0 as input pins to read switches */
 	RCC->AHBENR |= 0x01; /* Enable GPIOA clock (bit 0) */
 	GPIOA->MODER &= ~(0x0000000F); /* General purpose input mode */
@@ -31,7 +31,7 @@ void PinSetup () {
 	GPIOC->MODER |= (0x00055555); /* General purpose output mode*/
 }
 
-void InterruptSetup	() {
+void InterruptSetup() {
 	
 	SYSCFG->EXTICR[0] &= 0xFFF0;
 
@@ -81,12 +81,11 @@ void count2() {
 		else {
 			c2 = c2 - 1;
 		}
-		
 	}
 	
 }
 
-void updateLEDs	() {
+void updateLEDs() {
 	
 		GPIOC->BSRR |= (~c1 & 0x0F) << 16; //reset bits
 		GPIOC->BSRR |= (c1 & 0x0F); //set bits
@@ -97,7 +96,7 @@ void updateLEDs	() {
 /*----------------------------------------------------------*/
 /* Delay function - do nothing for about 0.5 second */
 /*----------------------------------------------------------*/
-void delay () {
+void delay() {
 	int i,j,n;
 	for (i=0; i<10; i++) { //outer loop
 		for (j=0; j<20000; j++) { //inner loop
@@ -106,14 +105,14 @@ void delay () {
  }
 }
 
-void smallDelay () {
+void smallDelay() {
   int i, j;
   for (i=0; i<100000; i++) { //outer loop
     i = j;; //dummy operation for single-step test
   }
 }
 
-void EXTI0_IRQHandler	() {
+void EXTI0_IRQHandler() {
 	EXTI->PR |= 0x0001;
 	
 	c2_direction = 1;
@@ -131,7 +130,7 @@ void EXTI0_IRQHandler	() {
 	NVIC_ClearPendingIRQ(EXTI0_IRQn);
 }
 
-void EXTI1_IRQHandler	() {
+void EXTI1_IRQHandler() {
 	EXTI->PR |= 0x0002;
 	c2_direction = 0;
 	
