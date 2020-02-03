@@ -38,7 +38,7 @@ void InterruptSetup() {
 	SYSCFG->EXTICR[0] &= 0xFF0F;
 	SYSCFG->EXTICR[0] |= 0x0010;
 	
-	EXTI->RTSR |= 0x0003;
+	EXTI->FTSR |= 0x0003;
 	EXTI->IMR |= 0x0003;
 	EXTI->PR |= 0x0003;
 	
@@ -115,7 +115,7 @@ void smallDelay() {
 void EXTI0_IRQHandler() {
 	EXTI->PR |= 0x0001;
 	
-	c2_direction = 1;
+	c2_direction = 0;
 	
 	if (LED8 == 1) {
 		GPIOC->BSRR |= 0x0100 << 16;
@@ -132,7 +132,8 @@ void EXTI0_IRQHandler() {
 
 void EXTI1_IRQHandler() {
 	EXTI->PR |= 0x0002;
-	c2_direction = 0;
+	
+	c2_direction = 1;
 	
 	if (LED9 == 1) {
 		GPIOC->BSRR |= 0x0200 << 16;
