@@ -159,7 +159,7 @@ void EXTI1_IRQHandler() {
 	}
 	
 	smallDelay();
-	NVIC_ClearPendingIRQ(EXTI0_IRQn); //Reset pending register for EXTI1
+	NVIC_ClearPendingIRQ(EXTI1_IRQn); //Reset pending register for EXTI1
 }
 
 
