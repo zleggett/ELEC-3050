@@ -22,7 +22,9 @@ unsigned char LED9; // state of LED9 which is toggled by EXTI1
 /* PA0 triggers interrupt EXTI0 */
 /* PA1 triggers interrupt EXTI1 */
 /* PC[3:0] = counter1 output */
-/* PC[7:0] = counter2 output */
+/* PC[7:4] = counter2 output */
+/* PC[8] = LED for EXTI0 */
+/* PC[9] = LED for EXTI1 */
 /*---------------------------------------------------*/
 void PinSetup() {
 	/* Configure PA1 and PA0 as input pins for buttons */
