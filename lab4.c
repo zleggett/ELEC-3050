@@ -155,7 +155,7 @@ void EXTI1_IRQHandler() {
 	}
 	else {
 		GPIOC->BSRR |= 0x0200; // Turn LED9 on
-		LED8 = 0;
+		LED9 = 1;
 	}
 	
 	smallDelay();
