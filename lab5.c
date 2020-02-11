@@ -115,7 +115,7 @@ void smallDelay() {
 void EXTI1_IRQHandler() {
 	EXTI->PR |= 0x0002; //Set pending register for EXTI1
 	
-	const int COLUMN_MASK[] = {(GPIOB->BSRR & 0x80), (GPIOB->BSRR & 0x40), (GPIOB->BSRR & 0x20), (GPIOB->BSRR & 0x10)};
+	const int COLUMN_MASK[] = {(GPIOB->BSRR & 0x10), (GPIOB->BSRR & 0x20), (GPIOB->BSRR & 0x40), (GPIOB->BSRR & 0x80)};
 	const int ROW_MASK[] = {(GPIOB->IDR & 0x01), (GPIOB->IDR & 0x02), (GPIOB->IDR & 0x04), (GPIOB->IDR & 0x08)};
 	
 	for (keypad1.column=0; keypad1.column < 4; keypad1.column++) {
