@@ -1,11 +1,9 @@
 /*====================================================*/
 /* Zachary Leggett and Santhosh Thundena */
-/* ELEC 3040/3050 - Lab 4 */
-/* Two decade counters controlled that both initial count up. */
-/* Counter 1 has a delay of 0.5 sec and Counter 2 has a delay of 1 sec. */
-/* Pushing button PA0 triggers interrupt EXTI0 that sets Counter 2 to count down and toggles LED8 */
-/* Pushing button PA1 triggers interrupt EXTI1 that sets Counter 2 to count up and toggles LED9. */
-/* Counter 1 is diaplayed on LEDs 3-0 and Counter 2 is displayed on LEDs 7-4. */
+/* ELEC 3040/3050 - Lab 5 */
+/* One decade counter that continually counts up with 1 sec delay. */
+/* If kepad button is pressed, then keypad value is diaplayed */
+/* for 5 sec, while counter counts to increase. */
 /*====================================================*/
 
 #include "STM32L1xx.h" /* Microcontroller information */
@@ -13,8 +11,8 @@
 /* Define global variables */
 
 struct {
-	unsigned char row;
-	unsigned char column;
+	int row;
+	int column;
 	unsigned char event;
 	const unsigned char row1[4];
   const unsigned char row2[4];
@@ -37,12 +35,10 @@ keypad keypad1 = {
 
 /*---------------------------------------------------*/
 /* Initialize GPIO pins used in the program */
-/* PA0 triggers interrupt EXTI0 */
 /* PA1 triggers interrupt EXTI1 */
-/* PC[3:0] = counter1 output */
-/* PC[7:4] = counter2 output */
-/* PC[8] = LED8 for EXTI0 */
-/* PC[9] = LED9 for EXTI1 */
+/* PC[3:0] = counter output */
+/* PB[3:0] = keypad rows */
+/* PB[7:4] = keypad columns */
 /*---------------------------------------------------*/
 void PinSetup() {
 	/* Configure PA1 as input */
@@ -52,12 +48,11 @@ void PinSetup() {
 	/* Configure PB7-0 as inputs */
 	RCC->AHBENR |= 0x02; // Enable GPIOB clock (bit 1)
 	GPIOB->MODER &= ~(0x0000FFFF);
+	GPIOB->MODER |= (0x00005500);
+	GPIOB->ODR = 0;
 	
 	GPIOB->PUPDR &= ~(0x000000FF);
 	GPIOB->PUPDR |= (0x00000055);
-	
-	GPIOB->PUPDR &= ~(0x0000FF00);
-	GPIOB->PUPDR |= (0x00005500);
 	
 	/* Configure PC[3:0] as output pins to disply value of counter */
 	RCC->AHBENR |= 0x04; // Enable GPIOC clock (bit 2)
@@ -70,9 +65,9 @@ void InterruptSetup() {
 	SYSCFG->EXTICR[0] &= 0xFF0F; // Clear EXTI1
 	SYSCFG->EXTICR[0] |= 0x0010; // Configure EXTI1 to be triggered by PA1
 	
-	EXTI->FTSR |= 0x0002; // Set EXTI0 and EXTI1 to be rising edge triggered
-	EXTI->IMR |= 0x0002; // Set interrupt masks for EXTI0 and EXTI1
-	EXTI->PR |= 0x0002; // Set pending register for EXTI0 and EXTI1
+	EXTI->FTSR |= 0x0002; // Set EXTI1 to be rising edge triggered
+	EXTI->IMR |= 0x0002; // Set interrupt masks for EXTI1
+	EXTI->PR |= 0x0002; // Set pending register for EXTI1
 
 	NVIC_EnableIRQ(EXTI1_IRQn); // Enable EXTI1
 	
@@ -80,7 +75,9 @@ void InterruptSetup() {
 }
 
 
-
+/*----------------------------------------------------------*/
+/* Output value to LEDs */
+/*----------------------------------------------------------*/
 void updateLEDs(unsigned char count) {
 	
 		GPIOC->BSRR |= (~count & 0x0F) << 16; //reset bits
@@ -109,34 +106,79 @@ void smallDelay() {
   }
 }
 
+/*------------------------------------------------*/
+/* Determine row number of pressed key */
+/*------------------------------------------------*/
+int readRow() {
+	GPIOB->MODER &= ~(0x0000FFFF);
+	GPIOB->MODER |= (0x00005500);
+	GPIOB->ODR = 0;
+	GPIOB->PUPDR &= ~(0x000000FF);
+	GPIOB->PUPDR |= (0x00000055);
+	
+	smallDelay();
+	
+	int input = GPIOB->IDR&0xF;
+	switch(input) {
+		case 0xE:
+			return 0;
+		case 0xD:
+			return 1;
+		case 0xB:
+			return 2;
+		case 0x7:
+			return 3;
+		default:
+			return -1;
+	}
+}
+
+/*------------------------------------------------*/
+/* Determine column number of pressed key */
+/*------------------------------------------------*/
+int readColumn() {
+	GPIOB->MODER &= ~(0x0000FFFF);
+	GPIOB->MODER |= (0x00000055);
+	GPIOB->ODR = 0;
+	GPIOB->PUPDR &= ~(0x0000FF00);
+	GPIOB->PUPDR |= (0x00005500);
+
+	smallDelay();
+	
+	int input = GPIOB->IDR&0xF0;
+	switch(input) {
+		case 0xE0:
+			return 0;
+		case 0xD0:
+			return 1;
+		case 0xB0:
+			return 2;
+		case 0x70:
+			return 3;
+		default:
+			return -1;
+	}
+}
+
 /*----------------------------------------------------------*/
 /* EXTI1_IRQHandler function - performs operations when EXTI1 is triggered */
 /*----------------------------------------------------------*/
 void EXTI1_IRQHandler() {
 	EXTI->PR |= 0x0002; //Set pending register for EXTI1
 	
-	const int COLUMN_MASK[] = {(GPIOB->BSRR & 0x10), (GPIOB->BSRR & 0x20), (GPIOB->BSRR & 0x40), (GPIOB->BSRR & 0x80)};
-	const int ROW_MASK[] = {(GPIOB->IDR & 0x01), (GPIOB->IDR & 0x02), (GPIOB->IDR & 0x04), (GPIOB->IDR & 0x08)};
-	
-	for (keypad1.column=0; keypad1.column < 4; keypad1.column++) {
-		GPIOB->BSRR |= 0x000000F0;
-		GPIOB->BSRR &= COLUMN_MASK[keypad1.column];
-		
-		for (keypad1.row=0; keypad1.row < 4; keypad1.row++) {
-			smallDelay();
-			unsigned short temp = (GPIOB->IDR & ROW_MASK[keypad1.row]);
+	keypad1.row = readRow();
+	keypad1.column = readColumn();
 			
-			if (!temp) {
+			if ((keypad1.row != -1) && (keypad1.column != -1)) {
 				keypad1.event = 4;
 				updateLEDs(keypad1.keys[keypad1.row][keypad1.column]);
-				GPIOB->BSRR |= 0x00F00000;
-				NVIC_ClearPendingIRQ(EXTI1_IRQn);
-				return;
 			}
-		}
-	}
-	
-	GPIOB->BSRR |= 0x00F00000;
+			
+	GPIOB->MODER &= ~(0x0000FFFF);
+	GPIOB->MODER |= (0x00005500);
+	GPIOB->ODR = 0;
+	GPIOB->PUPDR &= ~(0x000000FF);
+	GPIOB->PUPDR |= (0x00000055);		
 	NVIC_ClearPendingIRQ(EXTI1_IRQn); //Reset pending register for EXTI1
 }
 
@@ -150,9 +192,6 @@ int main(void) {
 	InterruptSetup(); // Configure interrupts
 	
 	unsigned char count = 0;
-	
-	GPIOB->BSRR |= 0x00F00000; // Ground columns
-
 	
 	__enable_irq(); //Enable interrupts to occur
 	
