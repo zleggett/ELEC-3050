@@ -48,7 +48,7 @@ void PinSetup() {
 	/* Configure PB7-0 as inputs */
 	RCC->AHBENR |= 0x02; // Enable GPIOB clock (bit 1)
 	GPIOB->MODER &= ~(0x0000FFFF);
-	GPIOB->MODER |= (0x00005500);
+	//GPIOB->MODER |= (0x00005500);
 	GPIOB->ODR = 0;
 	
 	GPIOB->PUPDR &= ~(0x000000FF);
@@ -173,6 +173,10 @@ void EXTI1_IRQHandler() {
 				keypad1.event = 4;
 				updateLEDs(keypad1.keys[keypad1.row][keypad1.column]);
 			}
+	
+	GPIOB->MODER &= ~(0x0000FFFF);
+	GPIOB->PUPDR &= ~(0x0000FF00);
+	GPIOB->PUPDR |= (0x00005500);
 			
 	GPIOB->MODER &= ~(0x0000FFFF);
 	GPIOB->MODER |= (0x00005500);
