@@ -48,7 +48,7 @@ void PinSetup() {
 	/* Configure PB7-0 as inputs */
 	RCC->AHBENR |= 0x02; // Enable GPIOB clock (bit 1)
 	GPIOB->MODER &= ~(0x0000FFFF);
-	//GPIOB->MODER |= (0x00005500);
+	GPIOB->MODER |= (0x00005500);
 	GPIOB->ODR = 0;
 	
 	GPIOB->PUPDR &= ~(0x000000FF);
@@ -88,6 +88,9 @@ void updateLEDs(unsigned char count) {
 /* Delay function - do nothing for about 1 second */
 /*----------------------------------------------------------*/
 void delay () {
+	if (keypad1.event) {
+	keypad1.event = keypad1.event - 1;
+	}
 	int i,j,n;
 	for (i=0; i<20; i++) { //outer loop
 		for (j=0; j<20000; j++) { //inner loop
@@ -174,6 +177,7 @@ void EXTI1_IRQHandler() {
 				updateLEDs(keypad1.keys[keypad1.row][keypad1.column]);
 			}
 	
+	RCC->AHBENR |= 0x02; // Enable GPIOB clock (bit 1)
 	GPIOB->MODER &= ~(0x0000FFFF);
 	GPIOB->PUPDR &= ~(0x0000FF00);
 	GPIOB->PUPDR |= (0x00005500);
@@ -184,6 +188,7 @@ void EXTI1_IRQHandler() {
 	GPIOB->PUPDR &= ~(0x000000FF);
 	GPIOB->PUPDR |= (0x00000055);		
 	NVIC_ClearPendingIRQ(EXTI1_IRQn); //Reset pending register for EXTI1
+	EXTI->PR |= 0x0002;
 }
 
 
@@ -211,10 +216,7 @@ int main(void) {
 			count = count + 1;  // Increments Count
 		}
 		
-		if (keypad1.event) {
-			keypad1.event--;
-		}
-		else {
+		if (keypad1.event == 0) {
 			updateLEDs(count);
 		}
 		
