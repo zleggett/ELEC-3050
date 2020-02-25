@@ -172,7 +172,7 @@ void EXTI1_IRQHandler() {
 			
 			if ((keypad1.row != -1) && (keypad1.column != -1)) {
 				keypad1.event = keypad1.keys[keypad1.row][keypad1.column];
-				MODIFY_REG(GPIOC->ODR, 0x000F, keypad1.event);
+				GPIOC->ODR = keypad1.event;
 				pressed = 1;
 			}
 	
