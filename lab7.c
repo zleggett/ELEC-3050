@@ -85,10 +85,10 @@ void InterruptSetup() {
 void TimerSetup() {
 	RCC->CR |= RCC_CR_HSION; // Turn on 16MHz HSI oscillator
   while ((RCC->CR & RCC_CR_HSIRDY) == 0); // Wait until HSI ready
-		RCC->CFGR |= RCC_CFGR_SW_HSI; // Select HSI as system clock
+	RCC->CFGR |= RCC_CFGR_SW_HSI; // Select HSI as system clock
   
   SET_BIT(RCC->APB2ENR, RCC_APB2ENR_TIM10EN); //enable clock source
-  TIM10->ARR = 999; //set auto reload. assumes 2MHz
+  TIM10->ARR = 99; //set auto reload. assumes 2MHz
   TIM10->PSC = 159; //set prescale.
   TIM10->CCR1 = 10; //Set compair value
   TIM10->CNT = 0;
