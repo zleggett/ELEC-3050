@@ -1,9 +1,8 @@
 /*====================================================*/
 /* Zachary Leggett and Santhosh Thundena */
-/* ELEC 3040/3050 - Lab 6 */
-/* Stopwatch controlled by timer interrupt. */
-/* Keypad button 0 controls start/stop  */
-/* Keypad button 1 controls reset */
+/* ELEC 3040/3050 - Lab 7 */
+/* PWM duty cycle controlled by keypab buttons. */
+/* Default period of 1ms */
 /*====================================================*/
 
 #include "STM32L1xx.h" /* Microcontroller information */
@@ -88,9 +87,9 @@ void TimerSetup() {
 	RCC->CFGR |= RCC_CFGR_SW_HSI; // Select HSI as system clock
   
   SET_BIT(RCC->APB2ENR, RCC_APB2ENR_TIM10EN); //enable clock source
-  TIM10->ARR = 99; //set auto reload. assumes 2MHz
+  TIM10->ARR = 99; //set auto reload. 
   TIM10->PSC = 159; //set prescale.
-  TIM10->CCR1 = 10; //Set compair value
+  TIM10->CCR1 = 10; //Set compare value
   TIM10->CNT = 0;
   MODIFY_REG(TIM10->CCMR1, TIM_CCMR1_CC1S, 0x0000); // Capture compair select
   MODIFY_REG(TIM10->CCMR1, TIM_CCMR1_OC1M, 0x0060); // Active to inactive
@@ -173,6 +172,7 @@ void EXTI1_IRQHandler() {
 			
 			if ((keypad1.row != -1) && (keypad1.column != -1)) {
 				keypad1.event = keypad1.keys[keypad1.row][keypad1.column];
+				MODIFY_REG(GPIOC->ODR, 0x000F, keypad1.event);
 				pressed = 1;
 			}
 	
