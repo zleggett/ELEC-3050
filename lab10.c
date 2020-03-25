@@ -56,7 +56,6 @@ void TIM11_IRQHandler()
 	if (adc_index < 100)									  //Check for 100 samples									//EDIT
 	{
 			adc_values[adc_index] = adc_out;		//Write results to output array					//EDIT
-			adc_index = adc_index + 1;
 	}
 	TIM11->SR &= ~TIM_SR_UIF;								//Clear TIM11 pending flag     					//EDIT
 	NVIC_ClearPendingIRQ(TIM11_IRQn);		 		//Clear TIM11 NVIC pending interrupts 	//EDIT
